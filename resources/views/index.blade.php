@@ -101,7 +101,7 @@
             <h2>What Is This?</h2>
             <p><em>Factom is Cool!</em> is a service making it easy to call the Factom API. No running of local nodes, no configuration, just run the command you want above. Please see the <a href="https://docs.factom.com/api">API documentation</a> for more info.</p>
             <h2>Is My Request Secure?</h2>
-            <p>We do not log any requests or parameters submitted to our node, and we are connecting via a TLS certificate and username / password authentication. That said, if you're concerned about privacy please run your own node <em>or</em> your own instance of this site: [insert GitHub URL here]</p>
+            <p><strong>Edit: currently we are running off of the courtesy node without TLS or a username and password.</strong></p><p style="text-decoration: line-through;">We do not log any requests or parameters submitted to our node, and we are connecting via a TLS certificate and username / password authentication. That said, if you're concerned about privacy please run your own node <em>or</em> your own instance of this site: <a href="https://github.com/1000nettles/factom-is-cool">https://github.com/1000nettles/factom-is-cool</a></p>
             <h2>Why Can't I Run <em>factom-walletd</em> Commands Here?</h2>
             <p>I don't want people importing private keys or generating addresses and asking me for them. If you need to generate a public / private key pair, please use the <a href="https://www.factom.com/devs/docs/howto/use-factoidpapermill">FactoidPapermill</a>.</p>
         </div>

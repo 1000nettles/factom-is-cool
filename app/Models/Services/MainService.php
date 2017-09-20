@@ -75,14 +75,18 @@ class MainService
                 }
             }
 
-            $cert = env('FACTOM_API_CERT', null);
+            if (env('FACTOM_API_USE_COURTESY', false)) {
+                $apiAdapter = new FactomAPIAdapter('https://courtesy-node.factom.com/v2');
+            } else {
+                $cert = env('FACTOM_API_CERT', null);
 
-            $apiAdapter = new FactomAPIAdapter(
-                $cert ? 'https://localhost:8088/v2' : 'http://localhost:8088/v2',
-                $cert,
-                env('FACTOM_API_USERNAME', null),
-                env('FACTOM_API_PASSWORD', null)
-            );
+                $apiAdapter = new FactomAPIAdapter(
+                    $cert ? 'https://localhost:8088/v2' : 'http://localhost:8088/v2',
+                    $cert,
+                    env('FACTOM_API_USERNAME', null),
+                    env('FACTOM_API_PASSWORD', null)
+                );
+            }
 
             $result = $apiAdapter->call(
                 $command->identifier,
