@@ -3,6 +3,7 @@
 namespace App\Models\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use App\Models\Entities\Process;
 use App\Models\Entities\Command;
 use App\Models\Entities\Visitor;
@@ -103,8 +104,7 @@ class MainService
 
             return $result;
         } catch (\Exception $e) {
-            //dd($e);
-            // TODO: flash message here
+            Log::critical($e->getMessage());
         }
 
         return null;
