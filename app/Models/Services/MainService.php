@@ -2,7 +2,7 @@
 
 namespace App\Models\Services;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Entities\Process;
 use App\Models\Entities\Command;
 use App\Models\Entities\Visitor;
@@ -16,7 +16,14 @@ class MainService
      *
      * @var int
      */
-    protected $apiCallTimeLimit    = 5;
+    protected $apiCallTimeLimit             = 5;
+
+    /**
+     * Amount of time in minutes how often we can check the factomd status
+     *
+     * @var int
+     */
+    protected $factomdStatusCheckInterval   = 2;
 
     /**
      * Get the API call time limit
@@ -110,13 +117,15 @@ class MainService
      */
     public function factomdStatus()
     {
-        $result = $this->callFactomd('properties');
+        return Cache::remember('factomd_status', $this->factomdStatusCheckInterval, function () {
+            $result = $this->callFactomd('properties');
 
-        if ($result === null) {
-            return false;
-        }
+            if ($result === null) {
+                return false;
+            }
 
-        return true;
+            return true;
+        });
     }
 
     /**
