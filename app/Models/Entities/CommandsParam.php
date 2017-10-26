@@ -16,6 +16,8 @@ class CommandsParam extends Model
 
     /**
      * Get the command that owns the commandsParam
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function command()
     {

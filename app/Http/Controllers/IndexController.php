@@ -10,25 +10,33 @@ use Illuminate\Support\Facades\Redirect;
 class IndexController extends Controller
 {
 
+    /**
+     * Render the homepage
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index()
     {
         $mainService = new MainService();
         $commandsJson = Command::where(
             'process_id', $mainService->getFactomdProcessId()
-        )
+            )
             ->with('CommandsParams')
             ->get();
 
         $siteName = $this->getSiteName();
         $status = $mainService->factomdStatus() ? 'Online' : 'Offline';
-        $donationAddr = env('FACTOM_DONATION_ADDR', null);
+        $donationAddr = env('FACTOM_DONATION_ADDR');
         $apiUrl = url('/api');
 
         /*
-         * Push result and previous API search data back
+         * Push result and previous API search data back if it exists
          */
         $lastResult = session('result');
-        if ($lastResult && !empty($lastResult['json']) && !empty($lastResult['command_id'])) {
+        if ($lastResult
+            && !empty($lastResult['json'])
+            && !empty($lastResult['command_id'])
+        ) {
             $resultsJson = $lastResult['json'];
             $lastCommand = $lastResult['command_id'];
         } else {
@@ -36,7 +44,18 @@ class IndexController extends Controller
             $lastCommand = null;
         }
 
-        return view('index', compact('commandsJson', 'siteName', 'status', 'donationAddr', 'apiUrl', 'resultsJson', 'lastCommand'));
+        return view(
+            'index',
+            compact(
+                'commandsJson',
+                'siteName',
+                'status',
+                'donationAddr',
+                'apiUrl',
+                'resultsJson',
+                'lastCommand'
+            )
+        );
     }
 
     /**
@@ -48,11 +67,16 @@ class IndexController extends Controller
     public function api(Request $request)
     {
         $mainService = new MainService();
-
         $ipCheck = $mainService->checkIpRestriction(request()->ip());
 
         if (!$ipCheck) {
-            $request->session()->flash('error', 'Please wait ' . $mainService->getApiCallTimeLimit() . ' seconds between API calls.');
+            $request->session()->flash(
+                'error',
+                'Please wait '
+                    . $mainService->getApiCallTimeLimit()
+                    . ' seconds between API calls.'
+            );
+
             return Redirect::route('index');
         }
 
@@ -65,7 +89,10 @@ class IndexController extends Controller
         $result = $mainService->callFactomd($commandId, $request->all());
 
         return Redirect::route('index')
-            ->with('result', ['json' => json_encode($result), 'command_id' => $commandId]);
+            ->with(
+                'result',
+                ['json' => json_encode($result), 'command_id' => $commandId]
+            );
     }
 
 }

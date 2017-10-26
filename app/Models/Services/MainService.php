@@ -44,7 +44,8 @@ class MainService
      */
     public function getFactomdProcessId()
     {
-        $processModel = Process::where('name', 'factomd')->first();
+        $processModel = Process::where('name', 'factomd')
+            ->first();
 
         if (!$processModel) {
             throw new \Exception('Cannot find factomd process model.');
@@ -60,14 +61,17 @@ class MainService
      * @param array $params
      * @return null|object|string
      */
-    public function callFactomd($commandId, $params = array())
+    public function callFactomd($commandId, $params = [])
     {
         try {
             $commandsParamsData = [];
             $command = Command::where(
                 'process_id', $this->getFactomdProcessId()
-            )
-                ->where(is_numeric($commandId) ? 'id' : 'identifier', $commandId)
+                )
+                ->where(
+                    is_numeric($commandId) ? 'id' : 'identifier',
+                    $commandId
+                )
                 ->with('CommandsParams')
                 ->first();
 
@@ -79,20 +83,25 @@ class MainService
 
             if (!empty($command->commandsParams) && !empty($params)) {
                 foreach ($command->commandsParams as $commandsParam) {
-                    $commandsParamsData[$commandsParam->identifier] = $params[$commandsParam->identifier];
+                    $identifier = $commandsParam->identifier;
+                    $commandsParamsData[$identifier] = $params[$identifier];
                 }
             }
 
             if (env('FACTOM_API_USE_COURTESY', false)) {
-                $apiAdapter = new FactomAPIAdapter('https://courtesy-node.factom.com/v2');
+                $apiAdapter = new FactomAPIAdapter(
+                    'https://courtesy-node.factom.com/v2'
+                );
             } else {
-                $cert = env('FACTOM_API_CERT', null);
+                $cert = env('FACTOM_API_CERT');
+                $certUrl = $cert ?
+                    'https://localhost:8088/v2' : 'http://localhost:8088/v2';
 
                 $apiAdapter = new FactomAPIAdapter(
-                    $cert ? 'https://localhost:8088/v2' : 'http://localhost:8088/v2',
+                    $certUrl,
                     $cert,
-                    env('FACTOM_API_USERNAME', null),
-                    env('FACTOM_API_PASSWORD', null)
+                    env('FACTOM_API_USERNAME'),
+                    env('FACTOM_API_PASSWORD')
                 );
             }
 
@@ -117,15 +126,19 @@ class MainService
      */
     public function factomdStatus()
     {
-        return Cache::remember('factomd_status', $this->factomdStatusCheckInterval, function () {
-            $result = $this->callFactomd('properties');
+        return Cache::remember(
+            'factomd_status',
+            $this->factomdStatusCheckInterval,
+            function () {
+                $result = $this->callFactomd('properties');
 
-            if ($result === null) {
-                return false;
+                if ($result === null) {
+                    return false;
+                }
+
+                return true;
             }
-
-            return true;
-        });
+        );
     }
 
     /**
@@ -141,7 +154,10 @@ class MainService
             ->format('m/d/Y h:i:s a');
         $visitor = Visitor::firstOrCreate(['ip' => $ip]);
 
-        if (!$visitor->wasRecentlyCreated && strtotime($visitor->updated_at) >= strtotime($minDate)) {
+        if (
+            !$visitor->wasRecentlyCreated
+            && strtotime($visitor->updated_at) >= strtotime($minDate)
+        ) {
             return false;
         } else if (!$visitor->wasRecentlyCreated) {
             $visitor->touch();
@@ -160,11 +176,20 @@ class MainService
     protected function checkParamsApplicable($command, $params)
     {
         if (!$command->commandsParams->isEmpty() && empty($params)) {
-            throw new \Exception('Command with identifier ' . $command->identifier . ' requires parameters.');
+            throw new \Exception(
+                'Command with identifier '
+                . $command->identifier
+                . ' requires parameters.'
+            );
         } else if (!$command->commandsParams->isEmpty() && !empty($params)) {
             foreach ($command->commandsParams as $commandsParam) {
                 if (empty($params[$commandsParam->identifier])) {
-                    throw new \Exception('Command with identifier ' . $command->identifier . ' requires parameter ' . $commandsParam->identifier);
+                    throw new \Exception(
+                        'Command with identifier '
+                        . $command->identifier
+                        . ' requires parameter '
+                        . $commandsParam->identifier
+                    );
                 }
             }
         }

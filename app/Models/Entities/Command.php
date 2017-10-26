@@ -17,6 +17,8 @@ class Command extends Model
 
     /**
      * Get the process that owns the command
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function process()
     {
@@ -25,6 +27,8 @@ class Command extends Model
 
     /**
      * Get the commands params associated with the command
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function commandsParams()
     {

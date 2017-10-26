@@ -11,6 +11,12 @@
 |
 */
 
+/*
+ * Homepage route
+ */
 Route::get('/', 'IndexController@index')->name('index');
 
+/*
+ * API route
+ */
 Route::post('/api', 'IndexController@api')->name('api');
