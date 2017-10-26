@@ -17,14 +17,35 @@ class MainService
      *
      * @var int
      */
-    protected $apiCallTimeLimit             = 5;
+    protected $apiCallTimeLimit = 5;
 
     /**
      * Amount of time in minutes how often we can check the factomd status
      *
      * @var int
      */
-    protected $factomdStatusCheckInterval   = 2;
+    protected $factomdStatusCheckInterval = 2;
+
+    /**
+     * The courtesy node factomd instance URL
+     *
+     * @var string
+     */
+    protected $courtesyNodeUrl = 'https://courtesy-node.factom.com/v2';
+
+    /**
+     * The local node factomd instance URL - secure
+     *
+     * @var string
+     */
+    protected $localNodeSecure = 'https://localhost:8088/v2';
+
+    /**
+     * The local node factomd instance URL - insecure
+     *
+     * @var string
+     */
+    protected $localNodeInsecure = 'http://localhost:8088/v2';
 
     /**
      * Get the API call time limit
@@ -90,12 +111,12 @@ class MainService
 
             if (env('FACTOM_API_USE_COURTESY', false)) {
                 $apiAdapter = new FactomAPIAdapter(
-                    'https://courtesy-node.factom.com/v2'
+                    $this->courtesyNodeUrl
                 );
             } else {
                 $cert = env('FACTOM_API_CERT');
                 $certUrl = $cert ?
-                    'https://localhost:8088/v2' : 'http://localhost:8088/v2';
+                    $this->localNodeSecure : $this->localNodeInsecure;
 
                 $apiAdapter = new FactomAPIAdapter(
                     $certUrl,
